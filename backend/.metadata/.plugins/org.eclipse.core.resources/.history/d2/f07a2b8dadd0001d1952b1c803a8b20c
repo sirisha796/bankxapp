@@ -1,0 +1,25 @@
+package com.api.bankxapp.service;
+
+import com.api.bankxapp.dto.TransactionDTO;
+import com.api.bankxapp.repository.TransactionRepository;
+
+public class TransactionService {
+	
+	private TransactionRepository transactionRepo;
+	
+	public void createTransaction(TransactionDTO transactionDTO) {
+		
+		Transaction transaction=new Transaction(transactionDTO.getId(),
+				transactionDTO.getTransactionName(),
+				transactionDTO.getAmount(),
+				transactionDTO.getTransactionType()
+				);
+		
+		
+
+		transaction.
+		transactionRepo.save();
+		
+	}
+
+}

@@ -1,0 +1,15 @@
+package com.api.bankxapp.repository;
+
+import java.util.Date;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import com.api.bankxapp.entity.Account;
+import com.api.bankxapp.entity.Transaction;
+
+public interface TransactionRepository extends JpaRepository<Transaction, Long>{
+
+	@Query(value = "select * from Transaction t where t.transaction_Date=?1 and t.isBankZ=?2", nativeQuery = true)
+	Account findByNativeSQL(Date transaction_date,boolean isBankZ);
+}

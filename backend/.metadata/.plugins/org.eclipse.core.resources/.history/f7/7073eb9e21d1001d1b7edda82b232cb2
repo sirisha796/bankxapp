@@ -1,0 +1,5 @@
+package com.api.bankxapp.service;
+
+public class CustomerService {
+
+}

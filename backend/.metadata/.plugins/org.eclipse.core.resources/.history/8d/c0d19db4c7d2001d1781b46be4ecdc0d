@@ -1,0 +1,153 @@
+package com.api.bankxapp.service;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.api.bankxapp.dto.TransactionDTO;
+import com.api.bankxapp.entity.Account;
+import com.api.bankxapp.entity.Transaction;
+import com.api.bankxapp.producer.RabbitMQProducer;
+import com.api.bankxapp.repository.AccountRepository;
+import com.api.bankxapp.repository.TransactionRepository;
+import com.api.bankxapp.utilities.AccountType;
+import com.api.bankxapp.utilities.TransactionType;
+
+@Service
+public class TransactionService {
+	
+	@Autowired
+	private TransactionRepository transactionRepo;
+	
+	@Autowired
+	private AccountRepository accountRepo;
+	
+	@Autowired
+	private RabbitMQProducer producer;
+	
+	public TransactionDTO createTransaction(TransactionDTO transactionDTO) {
+		System.out.println("actid:::"+transactionDTO.getOrginalCustomerId());
+		Account account=accountRepo.findByNativeSQL(transactionDTO.getOrginalCustomerId(), AccountType.Current);
+		System.out.println("actid:::"+account.getAccountId());
+		Transaction transaction=new Transaction(transactionDTO.getId(),
+				transactionDTO.getTransactionName(),
+				transactionDTO.getAmount(),
+				transactionDTO.getTransactionType(),
+				transactionDTO.getAccount_TransId()
+				);
+	
+		transaction.setAccount_transId(account.getAccountId());
+		transaction.setTransactionDate(new Date());
+		transaction.setBankZ(false);
+		
+		transactionRepo.save(transaction);
+		
+		if (transactionDTO.getTransactionType()==TransactionType.DEBIT)
+		account.setBalance(account.getBalance()-transactionDTO.getAmount());
+		else
+			account.setBalance(account.getBalance()+transactionDTO.getAmount());	
+		accountRepo.save(account);
+		return transactionDTO;
+		
+	}
+	
+	public TransactionDTO transferToOtherAccount(TransactionDTO transactionDTO) {
+		
+		//get AccountCustId of debit account
+		Account account=accountRepo.findByNativeSQL(transactionDTO.getOrginalCustomerId(), AccountType.Current);
+		Transaction tran=new Transaction();
+		tran.setAccount_transId(account.getAccountId());
+		tran.setTransactionName(transactionDTO.getTransactionName());
+		tran.setAmount(transactionDTO.getAmount());
+		tran.setTransactionType(TransactionType.DEBIT);
+		transactionRepo.save(tran);
+		 producer.sendMessage("Current Account Debited with "+transactionDTO.getAmount());
+		 
+		//debiting 0.05% of the transaction
+		tran.setTransactionName("Debiting 0.05% of transaction charges");
+		long transactionCharges=(long)(transactionDTO.getAmount() - ((transactionDTO.getAmount()*0.05)/100));
+		tran.setAmount(transactionCharges);
+		transactionRepo.save(tran);
+		producer.sendMessage("Current Account Debited with Transaction charges 0.05% "+transactionCharges);
+		
+		long curBalance=account.getBalance()-(transactionDTO.getAmount()+transactionCharges);
+		account.setBalance(curBalance);
+		accountRepo.save(account);
+		
+				//get AccountCustId of credit account
+				System.out.println("custId::"+transactionDTO.getCustomerId());
+				Account account1=accountRepo.findByNativeSQL(transactionDTO.getCustomerId(), AccountType.Current);
+				Transaction tran1=new Transaction();
+				tran1.setAccount_transId(account1.getAccountId());
+				tran1.setTransactionName(transactionDTO.getTransactionName());
+				tran1.setAmount(transactionDTO.getAmount());
+				tran1.setTransactionType(TransactionType.CREDIT);
+				transactionRepo.save(tran1);
+				producer.sendMessage("Current Account Credited with "+transactionDTO.getAmount());
+				account1.setBalance(account1.getBalance()+transactionDTO.getAmount());
+				accountRepo.save(account1);
+		return transactionDTO;
+	}
+	
+
+public TransactionDTO transferToInternalAccount(TransactionDTO transactionDTO) {
+		
+		//get AccountCustId of debit account
+		
+		int debitAccountType=AccountType.Current==transactionDTO.getTransferFrom()? AccountType.Current: AccountType.SAVING;
+		String accountType= debitAccountType==0?"Current":"Saving";
+		Account account=accountRepo.findByNativeSQL(transactionDTO.getOrginalCustomerId(), debitAccountType);
+		Transaction tran=new Transaction();
+		tran.setAccount_transId(account.getAccountId());
+		tran.setTransactionName(transactionDTO.getTransactionName());
+		tran.setAmount(transactionDTO.getAmount());
+		tran.setTransactionType(TransactionType.DEBIT);
+		transactionRepo.save(tran);
+		 producer.sendMessage(accountType+" Account Debited with "+transactionDTO.getAmount());
+		 
+		//debiting 0.05% of the transaction
+		tran.setTransactionName("Debiting 0.05% of transaction charges");
+		long transactionCharges=(long)(transactionDTO.getAmount() - ((transactionDTO.getAmount()*0.05)/100));
+		tran.setAmount(transactionCharges);
+		transactionRepo.save(tran);
+		producer.sendMessage(accountType+" Account Debited with Transaction charges 0.05% "+transactionCharges);
+		
+		long curBalance=account.getBalance()-(transactionDTO.getAmount()+transactionCharges);
+		account.setBalance(curBalance);
+		accountRepo.save(account);
+		
+				//get AccountCustId of credit account
+		int creditAccountType=AccountType.Current==transactionDTO.getTransferTo()? AccountType.Current: AccountType.SAVING;
+		accountType= creditAccountType==0?"Current":"Saving";
+				Account account1=accountRepo.findByNativeSQL(transactionDTO.getOrginalCustomerId(), creditAccountType);
+				Transaction tran1=new Transaction();
+				tran1.setAccount_transId(account1.getAccountId());
+				tran1.setTransactionName(transactionDTO.getTransactionName());
+				tran1.setAmount(transactionDTO.getAmount());
+				tran1.setTransactionType(TransactionType.CREDIT);
+				transactionRepo.save(tran1);
+				producer.sendMessage(accountType+" Account Credited with "+transactionDTO.getAmount());
+				long creditedAmt=0;		
+		if (transactionDTO.getTransferTo()==AccountType.SAVING) {
+			tran1.setTransactionName("Crediting Saving Account with 0.5% of CurrentBalance");
+			creditedAmt=(long)((account1.getBalance()*0.5)/100);
+			tran1.setAmount(creditedAmt);
+			transactionRepo.save(tran1);
+		}
+		account1.setBalance(account1.getBalance()+transactionDTO.getAmount()+creditedAmt);
+		accountRepo.save(account1);
+		
+		return transactionDTO;
+	}
+
+
+public List<TransactionDTO> getTransactionsByBankZ4BankXOnCurrentDate(){
+	ArrayList<Transaction> tranList=transactionRepo.findByNativeSQL(new Date(),true);
+	
+	return null;
+}
+
+}

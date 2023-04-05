@@ -1,0 +1,93 @@
+package com.api.bankxapp.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.api.bankxapp.dto.CustomerDTO;
+import com.api.bankxapp.dto.CustomerDetailsDTO;
+import com.api.bankxapp.dto.TransactionDTO;
+import com.api.bankxapp.dto.TransactionDTO4BankZ;
+import com.api.bankxapp.mapper.TransactionMapper;
+import com.api.bankxapp.producer.RabbitMQProducer;
+import com.api.bankxapp.service.CustomerService;
+import com.api.bankxapp.service.TransactionService;
+import com.api.bankxapp.utilities.AccountType;
+
+@RestController
+
+@CrossOrigin(origins = "http://localhost:4200")
+
+public class TransactionController {
+
+	@Autowired
+	private TransactionService transactionService;
+	
+	@Autowired
+	private CustomerService customerService;
+	
+	
+	
+	
+	
+	@PostMapping(path="/createTransaction")
+    public ResponseEntity<String> createTransaction(@RequestBody TransactionDTO transaction){
+		transaction.setBankZ(false);
+        int status=transactionService.createTransaction(transaction,AccountType.Current);
+        if (status==0)
+        return new ResponseEntity<>("Transaction Created", HttpStatus.CREATED);
+        else
+        	return new ResponseEntity<>("Transaction Failed", HttpStatus.INTERNAL_SERVER_ERROR);	
+    }
+	
+	@PostMapping(path="/createCustomer")
+    public ResponseEntity<CustomerDetailsDTO> createCustomer(@RequestBody CustomerDetailsDTO customerdetails){
+        customerService.createCustomer(customerdetails);
+       
+        return new ResponseEntity<>(customerdetails, HttpStatus.CREATED);
+    }
+	
+	
+	@GetMapping(path="/getAllCustomers")
+	public List<CustomerDTO> getAllCustomers(){
+		return customerService.getAllCustomers();
+	}
+	
+	@PostMapping(path="/transferToOtherAccount")
+    public ResponseEntity<TransactionDTO> transferToOtherAccount(@RequestBody TransactionDTO transactionDTO){
+        transactionService.transferToOtherAccount(transactionDTO);
+        //producer.sendMessage("Savng Account Credited with Rs.500");
+        return new ResponseEntity<>(transactionDTO, HttpStatus.CREATED);
+    }
+	
+	@PostMapping(path="/transferInternally")
+    public ResponseEntity<TransactionDTO> transferInternally(@RequestBody TransactionDTO transactionDTO){
+        transactionService.transferToInternalAccount(transactionDTO);
+        //producer.sendMessage("Savng Account Credited with Rs.500");
+        return new ResponseEntity<>(transactionDTO, HttpStatus.CREATED);
+    }
+	
+	@GetMapping(path="/getTransactionsByBankZ4BankXOnCurrentDate")
+	public List<TransactionDTO4BankZ> getTransactionsByBankZ4BankXOnCurrentDate(){
+		return transactionService.getTransactionsByBankZ4BankXOnCurrentDate();
+	}
+	
+	@PostMapping(path="/createTransaction4BankZ")
+    public ResponseEntity<String> createTransaction4BankZ(@RequestBody TransactionDTO4BankZ transactionDTO4BankZ){
+		TransactionDTO transactionDTO=TransactionMapper.DTO4BankZ(transactionDTO4BankZ);
+		transactionDTO.setBankZ(true);
+        int status=transactionService.createTransaction(transactionDTO,,AccountType.Current);
+        if (status==0)
+            return new ResponseEntity<>("Transaction Created", HttpStatus.CREATED);
+            else
+            	return new ResponseEntity<>("Transaction Failed", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}

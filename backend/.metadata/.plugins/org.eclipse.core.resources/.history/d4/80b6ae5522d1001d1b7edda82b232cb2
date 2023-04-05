@@ -1,0 +1,9 @@
+package com.api.bankxapp.utilities;
+
+public final class AccountType {
+	
+	public static final Integer DEBIT=0;
+	public static final Integer CREDIT=1;
+	
+
+}

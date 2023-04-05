@@ -1,0 +1,14 @@
+package com.api.bankxapp.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import com.api.bankxapp.entity.Account;
+import com.api.bankxapp.entity.Customer;
+import com.api.bankxapp.entity.Transaction;
+
+public interface AccountRepository extends JpaRepository<Account, Long>{
+
+	@Query("select a from Account a where a.Cust_AccId=?1 and a.accountType=?2")
+	Account findByJPQL(Long customerId,int accountType);
+}

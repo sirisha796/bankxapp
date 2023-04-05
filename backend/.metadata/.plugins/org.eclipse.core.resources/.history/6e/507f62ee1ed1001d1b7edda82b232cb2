@@ -1,0 +1,54 @@
+package com.api.bankxapp.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class TransactionDTO {
+	private long id;
+	public long getId() {
+		return id;
+	}
+	public void setId(long id) {
+		this.id = id;
+	}
+	public String getTransactionName() {
+		return transactionName;
+	}
+	public void setTransactionName(String transactionName) {
+		this.transactionName = transactionName;
+	}
+	public long getAmount() {
+		return amount;
+	}
+	public void setAmount(long amount) {
+		this.amount = amount;
+	}
+	public int getTransactionType() {
+		return transactionType;
+	}
+	public TransactionDTO(long id, String transactionName, long amount, int transactionType) {
+		super();
+		this.id = id;
+		this.transactionName = transactionName;
+		this.amount = amount;
+		this.transactionType = transactionType;
+	}
+	public TransactionDTO() {
+		super();
+		
+	}
+	public void setTransactionType(int transactionType) {
+		this.transactionType = transactionType;
+	}
+	private String transactionName;
+	private long amount;
+	private int transactionType;
+	
+	private long account_TransId;
+}

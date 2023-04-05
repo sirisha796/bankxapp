@@ -1,0 +1,31 @@
+package com.api.bankxapp.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.api.bankxapp.dto.TransactionDTO;
+import com.api.bankxapp.entity.Transaction;
+import com.api.bankxapp.repository.TransactionRepository;
+
+@Service
+public class TransactionService {
+	
+	@Autowired
+	private TransactionRepository transactionRepo;
+	
+	public void createTransaction(TransactionDTO transactionDTO) {
+		
+		Transaction transaction=new Transaction(transactionDTO.getId(),
+				transactionDTO.getTransactionName(),
+				transactionDTO.getAmount(),
+				transactionDTO.getTransactionType()
+				);
+		
+		
+
+		transaction.
+		transactionRepo.save();
+		
+	}
+
+}

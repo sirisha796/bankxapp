@@ -1,0 +1,67 @@
+package com.api.bankxapp.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+public class Transaction {
+	public Transaction() {
+		super();
+	}
+	public long getId() {
+		return id;
+	}
+	public void setId(long id) {
+		this.id = id;
+	}
+	public String getTransactionName() {
+		return transactionName;
+	}
+	public void setTransactionName(String transactionName) {
+		this.transactionName = transactionName;
+	}
+	public long getAmount() {
+		return amount;
+	}
+	public void setAmount(long amount) {
+		this.amount = amount;
+	}
+	public int getTransactionType() {
+		return transactionType;
+	}
+	public void setTransactionType(int transactionType) {
+		this.transactionType = transactionType;
+	}
+	public Transaction(long id, String transactionName, long amount, int transactionType) {
+		super();
+		this.id = id;
+		this.transactionName = transactionName;
+		this.amount = amount;
+		this.transactionType = transactionType;
+	}
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private long id;
+	private String transactionName;
+	private long amount;
+	private int transactionType;
+	private long account_transId;
+	public long getAccount_transId() {
+		return account_transId;
+	}
+	public void setAccount_transId(long account_transId) {
+		this.account_transId = account_transId;
+	}
+	
+
+}

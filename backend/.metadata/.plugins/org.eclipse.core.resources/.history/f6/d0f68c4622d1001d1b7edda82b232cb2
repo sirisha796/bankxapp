@@ -1,0 +1,36 @@
+package com.api.bankxapp.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.api.bankxapp.dto.CustomerDTO;
+import com.api.bankxapp.dto.TransactionDTO;
+import com.api.bankxapp.entity.Customer;
+import com.api.bankxapp.entity.Transaction;
+import com.api.bankxapp.repository.AccountRepository;
+import com.api.bankxapp.repository.CustomerRepository;
+import com.api.bankxapp.repository.TransactionRepository;
+
+@Service
+public class CustomerService {
+	
+	@Autowired
+	private CustomerRepository customerRepo;
+	
+	@Autowired
+	private AccountRepository accountRepo;
+	
+	
+	public TransactionDTO createCustomer(CustomerDetailsDTO customerDetailsDTO) {
+		
+		Customer customer=new Customer(customerDetailsDTO.getId(),
+				customerDetailsDTO.getCustomerName()
+				);
+		Customer cust1=customerRepo.save(customer);
+		
+		
+		return transactionDTO;
+		
+	}
+
+}

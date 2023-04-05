@@ -1,0 +1,35 @@
+package com.api.bankxapp.dto;
+
+public class CustomerDetailsDTO {
+	
+	private String customerName;
+	
+	private Long Amount;
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+
+	public CustomerDetailsDTO() {
+		super();
+	}
+
+	public Long getAmount() {
+		return Amount;
+	}
+
+	public void setAmount(Long amount) {
+		Amount = amount;
+	}
+
+	public CustomerDetailsDTO(String customerName, Long amount) {
+		super();
+		this.customerName = customerName;
+		Amount = amount;
+	}
+
+}

@@ -1,0 +1,34 @@
+package com.api.bankxapp.mapper;
+
+import com.api.bankxapp.dto.AccountDTO;
+import com.api.bankxapp.dto.TransactionDTO;
+import com.api.bankxapp.entity.Account;
+import com.api.bankxapp.entity.Transaction;
+
+public class AccountMapper {
+	
+	public Account DTOtoEntity(AccountDTO accountDTO) {
+		
+		Account acc=new Account();
+		acc.setId(accountDTO.getId());
+		acc.setAccountType(accountDTO.getAccountType());
+		acc.setCust_AccId(accountDTO.getCust_AccId());
+		
+		return acc;
+	}
+	
+public TransactionDTO EntitytoDTO(Transaction transaction) {
+		
+		TransactionDTO tranDTO=new TransactionDTO();
+		tranDTO.setId(transaction.getId());
+		tranDTO.setAccount_TransId(transaction.getAccount_transId());
+		tranDTO.setAmount(transaction.getAmount());
+		tranDTO.setTransactionName(transaction.getTransactionName());
+		tranDTO.setTransactionType(transaction.getTransactionType());
+		
+		return tranDTO;
+	}
+	
+	
+
+}

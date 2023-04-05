@@ -1,0 +1,12 @@
+package com.api.bankxapp.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import com.api.bankxapp.entity.Account;
+import com.api.bankxapp.entity.Transaction;
+
+public interface TransactionRepository extends JpaRepository<Transaction, Long>{
+
+	
+}

@@ -1,0 +1,72 @@
+package com.api.bankxapp.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.api.bankxapp.dto.TransactionDTO;
+import com.api.bankxapp.entity.Account;
+import com.api.bankxapp.entity.Transaction;
+import com.api.bankxapp.repository.AccountRepository;
+import com.api.bankxapp.repository.TransactionRepository;
+import com.api.bankxapp.utilities.AccountType;
+import com.api.bankxapp.utilities.TransactionType;
+
+@Service
+public class TransactionService {
+	
+	@Autowired
+	private TransactionRepository transactionRepo;
+	
+	@Autowired
+	private AccountRepository accountRepo;
+	
+	public TransactionDTO createTransaction(TransactionDTO transactionDTO) {
+		
+		Transaction transaction=new Transaction(transactionDTO.getId(),
+				transactionDTO.getTransactionName(),
+				transactionDTO.getAmount(),
+				transactionDTO.getTransactionType(),
+				transactionDTO.getAccount_TransId()
+				);
+	
+		
+
+		
+		transactionRepo.save(transaction);
+		
+		return transactionDTO;
+		
+	}
+	
+	public TransactionDTO transferToOtherAccount(TransactionDTO transactionDTO) {
+		
+		//get AccountCustId of debit account
+		Account account=accountRepo.findByJPQL(transactionDTO.getOrginalCustomerId(), AccountType.Current);
+		Transaction tran=new Transaction();
+		tran.setAccount_transId(account.getAccountId());
+		tran.setTransactionName(transactionDTO.getTransactionName());
+		tran.setAmount(transactionDTO.getAmount());
+		tran.setTransactionType(TransactionType.DEBIT);
+		transactionRepo.save(tran);
+		
+		//debiting 0.05% of the transaction
+		tran.setTransactionName("Debiting 0.05% of transaction charges");
+		long transactionCharges=amount - ((amount*0.05)/100);
+		tran.setAmount(transactionCharges);
+		transactionRepo.save(tran);
+		
+		
+				//get AccountCustId of credit account
+				Account account1=accountRepo.findByJPQL(transactionDTO.getCustomerId(), AccountType.Current);
+				Transaction tran1=new Transaction();
+				tran.setAccount_transId(account.getAccountId());
+				tran.setTransactionName(transactionDTO.getTransactionName());
+				tran.setAmount(transactionDTO.getAmount());
+				tran.setTransactionType(TransactionType.CREDIT);
+				transactionRepo.save(tran1);
+		
+		
+		return transactionDTO;
+	}
+
+}
